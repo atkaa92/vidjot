@@ -13,11 +13,14 @@ const app = express()
 const ideas = require('./routes/ideas');
 const users = require('./routes/users');
 
-//Passport Config
+//passport Config
 require('./config/passport')(passport);
 
+//database config
+const db = require('./config/database');
+
 //connect to mongoose
-mongoose.connect('mongodb://127.0.0.1/vidjot-dev')
+mongoose.connect(db.mongoURI)
     .then(() => console.log('MongoDB Connected...'))
     .catch(err => console.log(err));
 
@@ -89,7 +92,7 @@ app.use('/ideas', ideas);
 app.use('/users', users);
 
 //listen 
-const port = 5000;
+const port = process.env.PORT || 5000;
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
 })

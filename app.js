@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const passport = require('passport');
 const exphbs = require('express-handlebars');
 const session = require('express-session');
 const flash = require('connect-flash');
@@ -12,10 +13,13 @@ const app = express()
 const ideas = require('./routes/ideas');
 const users = require('./routes/users');
 
+//Passport Config
+require('./config/passport')(passport);
+
 //connect to mongoose
 mongoose.connect('mongodb://127.0.0.1/vidjot-dev')
     .then(() => console.log('MongoDB Connected...'))
-    .catch(er => console.log(err));
+    .catch(err => console.log(err));
 
 //load modals
 require('./models/Idea');
@@ -23,7 +27,7 @@ const Idea = mongoose.model('ideas')
 
 //custom middleware
 app.use((req, res, next) => {
-    req.name = 'karen';
+    req.naame = 'karen';
     next()
 })
 
@@ -51,6 +55,10 @@ app.use(session({
     // cookie: { secure: true }
 }))
 
+//passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
 //flash middleware
 app.use(flash());
 
@@ -61,6 +69,7 @@ app.use((req, res, next) => {
     res.locals.error_msg = req.flash('error_msg');
     res.locals.info_msg = req.flash('info_msg');
     res.locals.error = req.flash('error');
+    res.locals.user = req.user || null;
     next();
 })
 
@@ -74,8 +83,6 @@ app.get('/', (req, res) => {
 app.get('/about', (req, res) => {
     res.render('about')
 })
-
-
 
 //use routes
 app.use('/ideas', ideas);
